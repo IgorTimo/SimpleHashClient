@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TextArea, Button, Message, Input, Form } from "semantic-ui-react";
 import Layout from "../components/Layout";
+import postDocument from "../utils/requestHash/postDocument";
 
 const PostHash = (props) => {
   const [title, setTitle] = useState("");
@@ -8,7 +9,7 @@ const PostHash = (props) => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
       event.preventDefault();
       setSuccessMessage("");
       setErrorMessage("");
@@ -19,14 +20,20 @@ const PostHash = (props) => {
       if(!text){
         setErrorMessage("А описание? И чему вас только в школе учат!");
         return;
+      }
 
+      try{
+        const response = await postDocument(title, text);
+        setSuccessMessage("Записть прошла успешо! Хэш: " + response);
+      }catch(error){
+        setErrorMessage(error.message);
       }
   }
 
 
   return (
     <Layout>
-      <Form onSubmit={handleSubmit} error={!!errorMessage}>
+      <Form onSubmit={handleSubmit} error={!!errorMessage} success={!!successMessage}>
         <Form.Field
           value={title}
           onChange={(event) => setTitle(event.target.value)}

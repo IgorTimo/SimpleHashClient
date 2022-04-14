@@ -1,22 +1,29 @@
 import { useState } from "react";
+import { Container } from "semantic-ui-react";
 import { Form, Input, Button, Message } from "semantic-ui-react";
 import Layout from "../components/Layout";
+import getDocumentByHash from "../utils/requestHash/getDocumentByHash";
 
 const GetByHash = (props) => {
-  const [hash, setHash] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [hash, setHash] = useState(props.hash || "");
+  const [document, setDocument] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    setSuccessMessage("");
     setErrorMessage("");
-    if(!hash){
+    if (!hash) {
       setErrorMessage("По пустому особо не загрузишь :(");
       return;
     }
-    
-}
+
+    try {
+      const response = await getDocumentByHash(hash);
+      setDocument(response);
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  };
   return (
     <Layout>
       <Form onSubmit={handleSubmit} error={!!errorMessage}>
@@ -32,11 +39,22 @@ const GetByHash = (props) => {
             Загрузить
           </Button>
         </Form.Field>
-        <Message success header="Отлично!" content={successMessage} />
         <Message error header="Эх..." content={errorMessage} />
       </Form>
+      <Container>
+        <h1>{document.title}</h1>
+        <h3>{document.text}</h3>
+      </Container>
     </Layout>
   );
 };
+
+export async function getServerSideProps(context) {
+  const hash = context.query.hash || "";
+
+  return {
+    props: { hash },
+  };
+}
 
 export default GetByHash;
