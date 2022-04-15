@@ -42,6 +42,7 @@ const PostHash = (props) => {
           placeholder="Ну его сюда"
         />
         <Form.Field
+        rows="20"
           value={text}
           onChange={(event) => setText(event.target.value)}
           control={TextArea}
